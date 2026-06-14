@@ -28,7 +28,27 @@ paired with its *closest available* book entry rather than an arbitrary
 same-amount one, while a wide window (`MAXWIN`, default **120 days**) still
 lets a payment booked a quarter later find its match.
 
-## Usage
+## Two ways to run
+
+### A) Web app (upload &rarr; reconcile &rarr; download ZIP)
+
+```bash
+pip install -r requirements.txt
+python app.py
+```
+
+Open <http://127.0.0.1:5000>, upload the Mygate ledger + one or more bank
+statements, and download a ZIP of the same sheets with matched rows
+highlighted green, plus `reconciliation_summary.txt`. Files are processed
+in memory and your originals are never modified.
+
+Files:
+- `app.py` &mdash; Flask routes (upload form, reconcile, ZIP download)
+- `reconcile_core.py` &mdash; in-memory matching engine (auto-detects the
+  Debit/Credit and Withdrawal/Deposit columns)
+- `templates/` &mdash; upload + result pages
+
+### B) Command-line script (overwrites files in place)
 
 ```bash
 pip install openpyxl

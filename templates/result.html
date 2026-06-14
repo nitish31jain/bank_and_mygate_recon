@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reconciliation result</title>
+  <style>
+    :root { --green:#2e8b57; --line:#e2e2e2; --bg:#f6f8f7; }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+           margin: 0; background: var(--bg); color: #1f2a25; }
+    .wrap { max-width: 760px; margin: 40px auto; padding: 0 16px; }
+    .card { background: #fff; border: 1px solid var(--line); border-radius: 12px;
+            padding: 28px; box-shadow: 0 1px 3px rgba(0,0,0,.04); margin-bottom: 18px; }
+    h1 { margin: 0 0 18px; font-size: 22px; }
+    h2 { font-size: 15px; margin: 22px 0 10px; color: #2f3a34; }
+    table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    th, td { text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+    th:first-child, td:first-child { text-align: left; }
+    thead th { color: #5d6b64; font-weight: 600; }
+    tr.total td { font-weight: 700; border-top: 2px solid #cfd8d3; }
+    .pill { display:inline-block; padding:2px 10px; border-radius: 999px;
+            font-size: 12px; font-weight: 600; }
+    .ok { background:#e7f6ec; color:#1e7a43; }
+    .warn { background:#fff4e5; color:#9a6400; }
+    .btn { display:inline-block; margin-top:8px; padding: 13px 22px; border:0;
+           border-radius: 8px; background: var(--green); color:#fff; font-size:15px;
+           font-weight:600; cursor:pointer; text-decoration:none; }
+    .btn:hover { background:#256e45; }
+    a.back { display:inline-block; margin-left: 14px; color:#5d6b64; font-size:14px; }
+    .gaps span { display:inline-block; margin-right: 16px; font-size: 13px; color:#3a463f; }
+    .gaps b { color:#1f2a25; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Reconciliation complete &nbsp;
+        {% set rate = (summary.bank_matched / summary.bank_total * 100) if summary.bank_total else 0 %}
+        <span class="pill {{ 'ok' if rate >= 90 else 'warn' }}">{{ '%.1f'|format(rate) }}% of bank lines matched</span>
+      </h1>
+
+      <a class="btn" href="{{ url_for('download', token=token) }}">&#8681; Download reconciled sheets (ZIP)</a>
+      <a class="back" href="{{ url_for('index') }}">&larr; Reconcile more files</a>
+
+      <h2>Matches by date gap (window {{ summary.maxwin }} days)</h2>
+      <div class="gaps">
+        <span>same day <b>{{ summary.buckets.same_day }}</b></span>
+        <span>1&ndash;5d <b>{{ summary.buckets['1_5'] }}</b></span>
+        <span>6&ndash;30d <b>{{ summary.buckets['6_30'] }}</b></span>
+        <span>31&ndash;90d <b>{{ summary.buckets['31_90'] }}</b></span>
+        <span>91+ d <b>{{ summary.buckets['91_plus'] }}</b></span>
+      </div>
+
+      <h2>Per file</h2>
+      <table>
+        <thead><tr><th>File</th><th>Transactions</th><th>Matched</th><th>Unmatched</th></tr></thead>
+        <tbody>
+          {% for pf in summary.per_file %}
+          <tr><td>{{ pf.name }}</td><td>{{ pf.total }}</td><td>{{ pf.matched }}</td><td>{{ pf.unmatched }}</td></tr>
+          {% endfor %}
+          <tr class="total"><td>Bank total</td><td>{{ summary.bank_total }}</td><td>{{ summary.bank_matched }}</td><td>{{ summary.bank_unmatched }}</td></tr>
+          <tr class="total"><td>{{ summary.mygate_name }}</td><td>{{ summary.mygate_total }}</td><td>{{ summary.mygate_matched }}</td><td>{{ summary.mygate_unmatched }}</td></tr>
+        </tbody>
+      </table>
+
+      <p style="font-size:13px;color:#5d6b64;margin-top:18px;">
+        The ZIP contains every uploaded sheet with matched rows highlighted green,
+        plus <code>reconciliation_summary.txt</code>. Un-highlighted rows are the
+        exceptions to review.
+      </p>
+    </div>
+  </div>
+</body>
+</html>
