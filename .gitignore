@@ -1,0 +1,13 @@
+# Private financial data — never commit actual statements / books exports
+*.xlsx
+*.xls
+_mygate_work.xlsx
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Claude Code local settings
+.claude/
